@@ -1,0 +1,19 @@
+# api/.htaccess
+# Prevent directory listing
+Options -Indexes
+
+# Block direct access to db.php and helpers.php from browser
+<Files "db.php">
+  Order allow,deny
+  Deny from all
+</Files>
+<Files "helpers.php">
+  Order allow,deny
+  Deny from all
+</Files>
+
+# Allow PHP files to be called as API endpoints
+<FilesMatch "\.php$">
+  Order allow,deny
+  Allow from all
+</FilesMatch>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiếng Việt — Verify</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=1.1">
+  <link rel="stylesheet" href="auth.css?v=1.1">
+</head>
+<body class="auth-body">
+
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="auth-flag">🇻🇳</span>
+      <h1 class="auth-title">Check your email</h1>
+    </div>
+
+    <p class="auth-verify-sub" id="verify-sub">
+      We sent a 6-digit code to <strong id="verify-email">—</strong>
+    </p>
+
+    <form id="form-verify" novalidate>
+      <div class="auth-field">
+        <label class="auth-label">Verification code</label>
+        <input class="auth-input auth-otp-input" type="text" id="otp-input"
+               placeholder="000000" maxlength="6"
+               inputmode="numeric" pattern="\d{6}"
+               autocomplete="one-time-code" autofocus>
+      </div>
+
+      <!-- Countdown ring -->
+      <div class="otp-countdown-wrap">
+        <svg class="otp-ring" viewBox="0 0 44 44">
+          <circle class="otp-ring-bg"    cx="22" cy="22" r="18"/>
+          <circle class="otp-ring-fill"  cx="22" cy="22" r="18" id="otp-ring-fill"/>
+        </svg>
+        <span class="otp-countdown-num" id="otp-countdown">60</span>
+      </div>
+
+      <p class="otp-expired-msg" id="otp-expired" style="display:none">
+        Code expired. <a href="#" id="resend-link">Send a new one →</a>
+      </p>
+
+      <div class="auth-error" id="verify-error"></div>
+
+      <button class="auth-btn" type="submit" id="verify-submit">
+        <span class="btn-text">Verify</span>
+        <span class="btn-spinner" style="display:none">Checking…</span>
+      </button>
+    </form>
+
+    <p class="auth-back"><a href="login.html">← Back to sign in</a></p>
+  </div>
+
+  <script src="auth.js?v=1.1"></script>
+  <script>
+    const uid   = sessionStorage.getItem('vn-pending-uid');
+    const email = sessionStorage.getItem('vn-pending-email');
+    const role  = sessionStorage.getItem('vn-pending-role');
+
+    if (!uid) window.location.href = 'login.html';
+
+    document.getElementById('verify-email').textContent = email || '—';
+
+    // ── Countdown ──────────────────────────────
+    const TOTAL = 60;
+    const CIRCUMFERENCE = 2 * Math.PI * 18; // r=18
+    const ringFill = document.getElementById('otp-ring-fill');
+    ringFill.style.strokeDasharray  = CIRCUMFERENCE;
+    ringFill.style.strokeDashoffset = 0;
+
+    let remaining = TOTAL;
+    const countEl   = document.getElementById('otp-countdown');
+    const expiredEl = document.getElementById('otp-expired');
+    const submitBtn = document.getElementById('verify-submit');
+
+    const tick = setInterval(() => {
+      remaining--;
+      countEl.textContent = remaining;
+      ringFill.style.strokeDashoffset = CIRCUMFERENCE * (1 - remaining / TOTAL);
+
+      if (remaining <= 0) {
+        clearInterval(tick);
+        countEl.textContent = '0';
+        expiredEl.style.display = 'block';
+        submitBtn.disabled = true;
+      } else if (remaining <= 10) {
+        ringFill.style.stroke = 'var(--red)';
+        countEl.style.color   = 'var(--red)';
+      }
+    }, 1000);
+
+    // ── Auto-submit when 6 digits entered ──────
+    document.getElementById('otp-input').addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 6);
+      if (this.value.length === 6 && remaining > 0) {
+        document.getElementById('form-verify').requestSubmit();
+      }
+    });
+
+    // ── Submit ─────────────────────────────────
+    document.getElementById('form-verify').addEventListener('submit', async e => {
+      e.preventDefault();
+      const code   = document.getElementById('otp-input').value.trim();
+      const errEl  = document.getElementById('verify-error');
+      const btn    = document.getElementById('verify-submit');
+
+      if (code.length !== 6) { errEl.textContent = 'Enter the 6-digit code.'; return; }
+
+      errEl.textContent = '';
+      btn.querySelector('.btn-text').style.display = 'none';
+      btn.querySelector('.btn-spinner').style.display = '';
+      btn.disabled = true;
+
+      try {
+        const res = await api('verify.php', { user_id: parseInt(uid), code });
+
+        if (res.pending_approval) {
+          // Teacher verified but awaiting admin
+          sessionStorage.removeItem('vn-pending-uid');
+          sessionStorage.removeItem('vn-pending-email');
+          sessionStorage.removeItem('vn-pending-role');
+          window.location.href = 'pending.html';
+          return;
+        }
+
+        // Store session
+        localStorage.setItem('vn-token',    res.token);
+        localStorage.setItem('vn-role',     res.role);
+        localStorage.setItem('vn-uid',      res.user_id);
+        localStorage.setItem('vn-name',     res.full_name || res.email);
+        localStorage.setItem('vn-lessons',  res.lessons);
+        localStorage.setItem('vn-known',    JSON.stringify(res.known || []));
+        localStorage.setItem('vn-qscore',   res.q_score);
+        localStorage.setItem('vn-qtotal',   res.q_total);
+        localStorage.setItem('vn-streak',   res.streak);
+
+        sessionStorage.removeItem('vn-pending-uid');
+        sessionStorage.removeItem('vn-pending-email');
+        sessionStorage.removeItem('vn-pending-role');
+
+        // Redirect by role
+        if (res.role === 'admin')        window.location.href = 'admin.html';
+        else if (res.role === 'teacher') window.location.href = 'teacher.html';
+        else                             window.location.href = 'index.html';
+
+      } catch (err) {
+        errEl.textContent = err.message;
+        btn.querySelector('.btn-text').style.display = '';
+        btn.querySelector('.btn-spinner').style.display = 'none';
+        btn.disabled = remaining > 0 ? false : true;
+      }
+    });
+
+    // ── Resend ─────────────────────────────────
+    document.getElementById('resend-link').addEventListener('click', async e => {
+      e.preventDefault();
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

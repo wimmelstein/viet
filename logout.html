@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Signing out…</title>
+  <style>
+    body { font-family: sans-serif; display: flex; align-items: center;
+           justify-content: center; min-height: 100vh; margin: 0;
+           background: #f8f5f0; color: #1a2744; }
+    p { font-size: 1rem; opacity: .6; }
+  </style>
+</head>
+<body>
+  <p>Signing out…</p>
+  <script>
+    // Call logout API if we have a token
+    const token = localStorage.getItem('vn-token');
+    const done = () => {
+      // Clear everything
+      localStorage.clear();
+      window.location.href = 'login.html';
+    };
+
+    if (token) {
+      const params = new URLSearchParams({ _token: token });
+      fetch('api/logout.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+      }).finally(done);
+    } else {
+      done();
+    }
+  </script>
+</body>
+</html>

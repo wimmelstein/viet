@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiếng Việt — Feedback</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=1.1">
+  <link rel="stylesheet" href="auth.css?v=1.1">
+  <style>
+    .fb-card {
+      max-width: 620px;
+      margin: 2.5rem auto;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem 2rem 2.5rem;
+    }
+    .fb-card h2 { margin: 0 0 .35rem; }
+    .fb-card .fb-sub { color: var(--ink-soft); font-size: .88rem; margin-bottom: 1.6rem; }
+
+    .fb-row { display: flex; gap: 1rem; margin-bottom: 1.1rem; flex-wrap: wrap; }
+    .fb-group { display: flex; flex-direction: column; gap: .35rem; flex: 1; min-width: 160px; }
+    .fb-group label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-soft); }
+
+    .fb-type-btns, .fb-pri-btns { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .fb-opt {
+      flex: 1; min-width: 90px;
+      padding: .55rem .8rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      font-family: var(--font-body);
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, color .15s;
+      text-align: center;
+    }
+    .fb-opt:hover { border-color: var(--navy); }
+    .fb-opt.sel-bug      { background: #fff3f3; border-color: var(--red); color: var(--red); }
+    .fb-opt.sel-change   { background: #f0faf6; border-color: var(--teal); color: var(--teal); }
+    .fb-opt.sel-low      { background: var(--gold-pale); border-color: var(--gold); color: #7a5c00; }
+    .fb-opt.sel-medium   { background: #fff3e0; border-color: #e07a00; color: #b85c00; }
+    .fb-opt.sel-high     { background: #fff0f0; border-color: var(--red); color: var(--red); }
+
+    .fb-input, .fb-textarea {
+      width: 100%; box-sizing: border-box;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: .65rem .85rem;
+      font-family: var(--font-body);
+      font-size: .93rem;
+      background: var(--bg);
+      color: var(--ink);
+      transition: border-color .15s;
+      resize: vertical;
+    }
+    .fb-input:focus, .fb-textarea:focus { outline: none; border-color: var(--navy); background: #fff; }
+    .fb-textarea { min-height: 110px; }
+
+    .fb-submit {
+      width: 100%; margin-top: 1.4rem;
+      padding: .75rem;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .fb-submit:hover { opacity: .88; }
+    .fb-submit:disabled { opacity: .5; cursor: default; }
+
+    .fb-toast {
+      display: none;
+      margin-top: 1rem;
+      padding: .7rem 1rem;
+      border-radius: 10px;
+      font-size: .88rem;
+      font-weight: 600;
+    }
+    .fb-toast.ok  { background: #f0faf6; color: var(--teal); border: 1px solid var(--teal); }
+    .fb-toast.err { background: #fff3f3; color: var(--red);  border: 1px solid var(--red); }
+  </style>
+</head>
+<body>
+
+  <nav id="main-nav">
+    <div class="nav-logo">Tiếng <em>Việt</em></div>
+    <div class="nav-links">
+      <a class="nav-btn" href="index.html">← Back to app</a>
+    </div>
+  </nav>
+
+  <div class="fb-card">
+    <h2>Send feedback</h2>
+    <p class="fb-sub">Report a bug or suggest a change. Your name will be included so we can follow up.</p>
+
+    <div class="fb-row">
+      <div class="fb-group">
+        <label>Type</label>
+        <div class="fb-type-btns">
+          <button class="fb-opt sel-bug"  data-type="bug"    onclick="selType(this)">🐛 Bug</button>
+          <button class="fb-opt"          data-type="change" onclick="selType(this)">✨ Change request</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fb-row">
+      <div class="fb-group">
+        <label>Priority</label>
+        <div class="fb-pri-btns">
+          <button class="fb-opt sel-low"   data-pri="low"    onclick="selPri(this)">Low</button>
+          <button class="fb-opt"           data-pri="medium" onclick="selPri(this)">Medium</button>
+          <button class="fb-opt"           data-pri="high"   onclick="selPri(this)">High</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fb-row">
+      <div class="fb-group">
+        <label>Title</label>
+        <input class="fb-input" id="fb-title" type="text" placeholder="Short summary of the issue or request" maxlength="200">
+      </div>
+    </div>
+
+    <div class="fb-row">
+      <div class="fb-group">
+        <label>Description <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <textarea class="fb-textarea" id="fb-body" placeholder="Steps to reproduce, expected vs actual behaviour, or more detail on the request…"></textarea>
+      </div>
+    </div>
+
+    <button class="fb-submit" id="fb-submit" onclick="submit()">Send feedback</button>
+    <div class="fb-toast" id="fb-toast"></div>
+  </div>
+
+  <script src="auth.js?v=1.5"></script>
+  <script>
+    let selTypeVal = 'bug';
+    let selPriVal  = 'low';
+
+    function selType(btn) {
+      document.querySelectorAll('.fb-type-btns .fb-opt').forEach(b => {
+        b.className = 'fb-opt';
+      });
+      btn.classList.add('sel-' + btn.dataset.type);
+      selTypeVal = btn.dataset.type;
+    }
+    function selPri(btn) {
+      document.querySelectorAll('.fb-pri-btns .fb-opt').forEach(b => {
+        b.className = 'fb-opt';
+      });
+      btn.classList.add('sel-' + btn.dataset.pri);
+      selPriVal = btn.dataset.pri;
+    }
+
+    async function submit() {
+      const title = document.getElementById('fb-title').value.trim();
+      const body  = document.getElementById('fb-body').value.trim();
+      const toast = document.getElementById('fb-toast');
+      const btn   = document.getElementById('fb-submit');
+      if (!title) { showToast('Please enter a title.', 'err'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      try {
+        const res = await api('feedback.php', { action: 'submit', type: selTypeVal, priority: selPriVal, title, body });
+        showToast(res.message || 'Sent!', 'ok');
+        document.getElementById('fb-title').value = '';
+        document.getElementById('fb-body').value  = '';
+      } catch(e) {
+        showToast(e.message || 'Something went wrong.', 'err');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Send feedback';
+    }
+
+    function showToast(msg, type) {
+      const t = document.getElementById('fb-toast');
+      t.textContent = msg;
+      t.className = 'fb-toast ' + type;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 5000);
+    }
+
+    validateSession().then(user => { if (!user) window.location.href = 'login.html'; });
+  </script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiếng Việt — Reading</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=1.6">
+  <link rel="stylesheet" href="reading.css?v=1.2">
+  <link rel="stylesheet" href="auth.css?v=1.2">
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav id="main-nav">
+    <div class="nav-logo">Tiếng <em>Việt</em></div>
+    <div class="nav-links">
+      <a class="nav-btn" href="index.html">← App</a>
+    </div>
+    <span class="nav-lesson-pill" id="nav-level-badge">All levels</span>
+
+    <div class="t-profile-wrap" id="t-profile-wrap" style="margin-left:.5rem">
+      <button class="t-profile-btn" id="t-profile-btn">
+        <span class="t-profile-avatar" id="t-profile-avatar">?</span>
+        <span class="t-profile-name"   id="t-profile-name">…</span>
+        <span class="t-profile-chevron">▾</span>
+      </button>
+      <div class="t-dropdown" id="t-dropdown">
+        <div class="t-dropdown-user">
+          <div class="t-dropdown-avatar" id="t-dd-avatar">?</div>
+          <div>
+            <div class="t-dropdown-fullname" id="t-dd-name">—</div>
+            <div class="t-dropdown-email"    id="t-dd-email">—</div>
+            <div class="t-dropdown-role"     id="t-dd-role">—</div>
+          </div>
+        </div>
+        <div class="t-dropdown-divider"></div>
+        <a class="t-dropdown-item" href="feedback.html">
+          <span class="t-dd-icon">💬</span> Feedback
+        </a>
+        <button class="t-dropdown-item" id="dd-change-password">
+          <span class="t-dd-icon">🔑</span> Change password
+          <span class="t-dd-soon">soon</span>
+        </button>
+        <button class="t-dropdown-item t-dropdown-signout" id="dd-logout">
+          <span class="t-dd-icon">↩</span> Sign out
+        </button>
+      </div>
+    </div>
+  </nav>
+  </nav>
+
+  <!-- ── LAYOUT ── -->
+  <div class="r-layout">
+
+    <!-- LEFT: text list sidebar -->
+    <aside class="r-sidebar">
+      <div class="r-sidebar-head">
+        <h2>Readings</h2>
+      <div class="r-filter-row">
+        <label class="r-filter-label">Your level</label>
+        <select id="level-filter" class="r-select">
+          <option value="2">Lessons 1–2</option>
+          <option value="5">Lessons 1–5</option>
+          <option value="7">Lessons 1–7</option>
+          <option value="12">Lessons 1–12</option>
+          <option value="15">Lessons 1–15</option>
+          <option value="19">Lessons 1–19</option>
+          <option value="23">Lessons 1–23</option>
+          <option value="27">Lessons 1–27</option>
+          <option value="32">All lessons</option>
+        </select>
+      </div>
+      </div>
+      <div class="r-text-list" id="r-text-list">
+        <!-- JS renders text cards here -->
+      </div>
+    </aside>
+
+    <!-- RIGHT: reading view -->
+    <main class="r-main" id="r-main">
+
+      <!-- Empty state -->
+      <div class="r-empty" id="r-empty">
+        <span class="r-empty-icon">📖</span>
+        <h3>Select a text to read</h3>
+        <p>Choose a reading from the left. Tap any highlighted word to see a grammar tip. Tap any Vietnamese word to hear it spoken aloud.</p>
+        <div class="r-tts-notice" id="r-tts-notice"></div>
+      </div>
+
+      <!-- Reading panel -->
+      <div class="r-panel" id="r-panel" style="display:none">
+
+        <!-- Header -->
+        <div class="r-panel-header">
+          <div class="r-panel-meta">
+            <span class="r-type-badge" id="rp-type">—</span>
+            <span class="r-level-badge" id="rp-level">—</span>
+            <span class="r-duration" id="rp-duration">—</span>
+          </div>
+          <h1 class="r-title" id="rp-title">—</h1>
+          <p class="r-subtitle" id="rp-subtitle">—</p>
+          <p class="r-intro" id="rp-intro">—</p>
+        </div>
+
+        <!-- Shadow mode toolbar -->
+        <div class="r-toolbar">
+          <div class="r-toolbar-left">
+            <button class="r-tool-btn" id="btn-shadow" title="Shadow mode — auto-advance sentence by sentence">
+              ▶ Shadow
+            </button>
+            <button class="r-tool-btn" id="btn-read-all" title="Read the whole text aloud">
+              🔊 Read all
+            </button>
+            <button class="r-tool-btn active" id="btn-show-trans" title="Toggle translation">
+              EN
+            </button>
+          </div>
+          <div class="r-toolbar-right">
+            <div class="r-speed-wrap">
+              <label class="r-speed-label">Speed</label>
+              <input type="range" id="speed-slider" min="0.4" max="1.0" step="0.1" value="0.8" class="r-speed-slider">
+              <span class="r-speed-val" id="speed-val">0.8×</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grammar legend -->
+        <div class="r-legend" id="r-legend"></div>
+
+        <!-- The text itself -->
+        <div class="r-text-body" id="r-text-body">
+          <!-- JS renders sentences here -->
+        </div>
+
+        <!-- Vocab review panel -->
+        <div class="r-vocab-section">
+          <h3 class="r-vocab-title">Vocabulary in this text</h3>
+          <p class="r-vocab-sub">New words introduced. Tap any word to hear it.</p>
+          <div class="r-vocab-chips" id="r-vocab-chips"></div>
+        </div>
+
+        <!-- Mini flashcard review -->
+        <div class="r-review-section" id="r-review-section">
+          <h3 class="r-vocab-title">Quick review</h3>
+          <p class="r-vocab-sub">Test yourself on the words from this text</p>
+          <div class="r-mini-card" id="r-mini-card">
+            <!-- JS renders review card -->
+          </div>
+          <div class="r-mini-controls">
+            <button class="r-mini-btn again" id="rmb-again">↩ Again</button>
+            <button class="r-mini-btn reveal" id="rmb-reveal" id="">Show answer</button>
+            <button class="r-mini-btn good" id="rmb-good" style="display:none">✓ Got it</button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Grammar tooltip -->
+  <div class="r-tooltip" id="r-tooltip"></div>
+
+  <script src="auth.js?v=1.6"></script>
+  <script src="data.js?v=1.2"></script>
+  <script src="store.js?v=1.2"></script>
+  <script src="readings.js?v=1.2"></script>
+  <script src="reading.js?v=1.2"></script>
+  <script>
+    validateSession().then(user => {
+      if (!user) return;
+
+      const name = localStorage.getItem('vn-name') || user.email;
+      const av   = name.trim().split(/\s+/).map(w => w[0].toUpperCase()).slice(0, 2).join('');
+      const role = (user.role || 'student').charAt(0).toUpperCase() + (user.role || 'student').slice(1);
+
+      document.getElementById('t-profile-avatar').textContent = av;
+      document.getElementById('t-profile-name').textContent   = name.split(' ')[0];
+      document.getElementById('t-dd-avatar').textContent      = av;
+      document.getElementById('t-dd-name').textContent        = name;
+      document.getElementById('t-dd-email').textContent       = user.email;
+      document.getElementById('t-dd-role').textContent        = role;
+
+      const btn      = document.getElementById('t-profile-btn');
+      const dropdown = document.getElementById('t-dropdown');
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+      });
+      document.addEventListener('click', () => dropdown.classList.remove('open'));
+      dropdown.addEventListener('click', e => e.stopPropagation());
+
+      document.getElementById('dd-logout').addEventListener('click', logout);
+      document.getElementById('dd-change-password').addEventListener('click', () => {
+        alert('Change password coming soon.');
+        dropdown.classList.remove('open');
+      });
+
+      // Update level badge
+      const badge = document.getElementById('nav-level-badge');
+      if (badge) badge.textContent = 'L' + (user.lessons || localStorage.getItem('vn-lessons') || '?');
+    });
+  </script>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="site-footer-links">
+        <a href="https://linkedin.com/wf.wiltenburg" target="_blank" rel="noopener" class="footer-icon-link" title="LinkedIn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+        </a>
+        <a href="https://wiltenburgit.nl" target="_blank" rel="noopener" class="footer-link">Wiltenburg IT</a>
+        <a href="mailto:info@waytogrowth.nl" class="footer-link">Contact</a>
+        <a href="#" class="footer-link footer-link-placeholder">Terms &amp; Conditions</a>
+      </div>
+      <div class="site-footer-made">
+        Made by <a href="https://wiltenburgit.nl" target="_blank" rel="noopener">Wiltenburg IT</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
